@@ -162,3 +162,54 @@ WHERE dea.continent IS NOT NULL
 SELECT *
 FROM PercentPopulationVaccinated
 
+--Queries for Tableau Viz
+
+--Total global numbers
+
+SELECT SUM(CAST(new_cases as int)) AS total_cases, SUM(CAST(new_deaths as int)) AS total_deaths, SUM(CAST(new_deaths as int))/SUM(CAST(new_cases as int))*100 AS death_percentage
+FROM CovidDeaths
+WHERE continent IS NOT NULL
+
+--Aggregate numbers per location
+
+SELECT location, SUM(CAST(new_deaths as int)) AS total_death_count
+FROM CovidDeaths
+WHERE continent IS NULL AND location NOT IN ('World', 'European Union', 'International','High income','Upper middle income','Lower middle income','Low income')
+--WHERE location = 'Kenya'
+GROUP BY location
+ORDER BY total_death_count DESC
+
+--Aggregate numbers per socioeconomic classes
+
+SELECT location, SUM(CAST(new_deaths as int)) AS total_death_count
+FROM CovidDeaths
+WHERE continent IS NULL AND location NOT IN ('World', 'European Union', 'International','Europe','Asia','North America','South America','Africa','Oceania')
+--WHERE location = 'Kenya'
+GROUP BY location
+ORDER BY total_death_count DESC
+
+--Infections per location/country
+
+SELECT location, population, MAX(total_cases) as highest_infection_count,  MAX((total_cases/population))*100 as population_infected_percent
+FROM CovidDeaths
+--Where location = 'Kenya'
+GROUP BY Location, Population
+ORDER BY population_infected_percent DESC
+
+--Infections per continent
+
+SELECT location, population, MAX(total_cases) AS highest_infection_count,  MAX((total_cases/population))*100 as population_infected_percent
+FROM CovidDeaths
+WHERE continent IS NULL AND location NOT IN ('World', 'European Union', 'International','High income','Upper middle income','Lower middle income','Low income')
+--Where location = 'Kenya'
+GROUP BY Location, Population
+ORDER BY population_infected_percent DESC
+
+--Infections per location by date
+
+SELECT location, population, date, MAX(total_cases) AS highest_infection_count,  MAX((total_cases/population))*100 as population_infected_percent
+FROM CovidDeaths
+--Where location = 'Kenya'
+WHERE continent IS NOT NULL --excludes numbers for continents
+GROUP BY location, population, date
+ORDER BY population_infected_percent DESC
